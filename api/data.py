@@ -5,8 +5,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 from datetime import datetime
+import html
 
-CRIME_DATA_URL = 'https://rupdadmin.rice.edu/crimelog/unskinned/'
+
 
 class CrimeDataParser:
 
@@ -20,7 +21,7 @@ class CrimeDataParser:
     def create_df(self, crime_html_data):
         case_number = [td.text for td in crime_html_data.find_all('td',{'class':'case_number'})]
         crime_type = [td.text for td in crime_html_data.find_all('td',{'class':'classification'})]
-        location = [td.text for td in crime_html_data.find_all('td',{'class':'location'})]
+        location = [html.unescape(td.text) for td in crime_html_data.find_all('td',{'class':'location'})]
         time_reported = [td.text for td in crime_html_data.find_all('td',{'class':'datetime_reported'})]
 
         data = {
@@ -45,7 +46,11 @@ class CrimeDataParser:
 
         return df
     
+    def find_unique_locations(self, df):
+        return np.unique(df['location'])
+    
 if __name__ == '__main__':
+    CRIME_DATA_URL = 'https://rupdadmin.rice.edu/crimelog/unskinned/'
     cdp = CrimeDataParser()
     data_html = cdp.get_crime_data_html(CRIME_DATA_URL)
     print(cdp.create_df(data_html))

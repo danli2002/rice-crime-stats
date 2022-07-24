@@ -1,10 +1,18 @@
 from flask_restful import Api, Resource, reqparse
+from api.data import CrimeDataParser
+import json
+
+CRIME_DATA_URL = 'https://rupdadmin.rice.edu/crimelog/unskinned/'
 
 class CrimeDataHandler(Resource):
     def get(self):
+        cdp = CrimeDataParser()
+        crime_data_html = cdp.get_crime_data_html(CRIME_DATA_URL)
+        crime_df = cdp.create_df(crime_data_html)
+        u_locations = json.dumps(cdp.find_unique_locations(crime_df).tolist())
         return {
-            'resultStatus': 'SUCCESS',
-            'message': 'This should be a success!'
+            'status': 'SUCCESS',
+            'message': u_locations
         }
 
     def post(self):
